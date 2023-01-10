@@ -1,8 +1,11 @@
 const express = require('express')
 const app = express()
-app.use(express.json())
 var morgan = require('morgan')
+
+app.use(express.json())
 app.use(morgan('tiny'))
+
+morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
 
 let persons = [
     { 
@@ -63,6 +66,7 @@ app.delete('/api/persons/:id', (request,response) => {
 })
 
 // CREATE
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 app.post('/api/persons', (request, response) => {
   let newId = getRandomInt(100000);
   const newPerson = request.body
@@ -88,7 +92,7 @@ app.post('/api/persons', (request, response) => {
 
   newPerson.id = newId
   persons = persons.concat(newPerson)
-  response.json(persons)
+  response.json(newPerson)
 })
 
 
