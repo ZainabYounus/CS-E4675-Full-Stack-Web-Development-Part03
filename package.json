@@ -6,7 +6,11 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "build:ui": "rd /s /q build && cd ../Exercises/part2/phonebook && npm run build && copy -r build ../../../part3",
+    "deploy": "flyctl deploy",
+    "deploy:full": "npm run build:ui && npm run deploy",    
+    "logs:prod": "flyctl logs"
   },
   "repository": {
     "type": "git",
@@ -17,9 +21,10 @@
   "bugs": {
     "url": "https://github.com/ZainabYounus/CS-E4675-Full-Stack-Web-Development-Part03/issues"
   },
-  "homepage": "https://github.com/ZainabYounus/CS-E4675-Full-Stack-Web-Development-Part03#readme",
   "dependencies": {
-    "express": "^4.18.2"
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
