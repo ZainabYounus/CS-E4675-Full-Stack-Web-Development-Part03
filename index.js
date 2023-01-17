@@ -1,7 +1,9 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 var morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 
 app.use(express.json())
 app.use(morgan('tiny'))
@@ -40,7 +42,9 @@ app.get('/', (request,response) => {
 
 // GET ALL
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+  Person.find({}).then(person => {
+    response.json(person)
+  })
 })
 
 // INFO Page
@@ -51,14 +55,9 @@ app.get('/info', (request, response) => {
 
 // GET BY ID
 app.get('/api/persons/:id', (request,response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(person=> person.id === id) //find() returns object.
-  if(person){
+  Person.findById(request.params.id).then(person => {
     response.json(person)
-  }
-  else{
-    response.status(404).end()
-  }
+  })
 })
 
 // DELETE
@@ -71,8 +70,13 @@ app.delete('/api/persons/:id', (request,response) => {
 // CREATE
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 app.post('/api/persons', (request, response) => {
-  let newId = getRandomInt(100000);
+
   const newPerson = request.body
+  console.log(newPerson)
+
+  if(newPerson === undefined){
+    return response.status(400).json({ error: 'content missing' })
+  }
 
   if(!newPerson.name){
     return response.status(400).json({
@@ -86,16 +90,25 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  const person = persons.find(person => person.name === newPerson.name)
-  if(person){
-    return response.status(400).json({
-      error: 'name must be unique'
-    })
-  }
+  // let person = Person.find(person => person.name === newPerson.name)
+  // console.log("99: ", person)
+  // if(person){
+  //   return response.status(400).json({
+  //     error: 'name must be unique'
+  //   })
+  // }
 
-  newPerson.id = newId
-  persons = persons.concat(newPerson)
-  response.json(newPerson)
+  const person = new Person({
+    name: newPerson.name,
+    number: newPerson.number
+  })
+
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
+  
+  // persons = persons.concat(newPerson)
+  // response.json(newPerson)
 })
 
 
@@ -104,7 +117,7 @@ function getRandomInt(max) {
 }
 
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
