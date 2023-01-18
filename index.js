@@ -10,34 +10,12 @@ app.use(express.json())
 app.use(morgan('tiny'))
 app.use(cors())
 
-morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
+morgan.token('body', function (req) { return JSON.stringify(req.body) })
 
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
 
 // Root page
 app.get('/', (request,response) => {
-    response.send('<h1>Hello World </h1>')
+  response.send('<h1>Hello World </h1>')
 })
 
 // GET ALL
@@ -45,17 +23,16 @@ app.get('/api/persons', (request, response, next) => {
   Person.find({}).then(person => {
     response.json(person)
   })
-  .catch(error => {next(error)})
+    .catch(error => {next(error)})
 })
 
 // INFO Page
 app.get('/info', (request, response, next) => {
-  const date = new Date().toString();
+  const date = new Date().toString()
   Person.find({}).then(person => {
     response.send(`<p>Phonebook has info for ${person.length} people</p> <p>${date}</p>`)
   })
-  .catch(error => {next(error)})
-  
+    .catch(error => {next(error)})
 })
 
 // GET BY ID
@@ -66,22 +43,18 @@ app.get('/api/persons/:id', (request,response,next) => {
     }
     else{
       response.status(404).end()
-    }
-    
-  })
-  .catch(error => {
-    next(error)
-    // response.status(400).send({error: 'malformatted id'})
-  })
+    }})
+    .catch(error => {
+      next(error)})
 })
 
 // DELETE
 app.delete('/api/persons/:id', (request,response, next) => {
   Person.findByIdAndRemove(request.params.id)
-  .then(result => {
-    response.status(204).end()
-  })
-  .catch(error => next(error))
+    .then(() => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 // CREATE
@@ -89,31 +62,6 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 app.post('/api/persons', (request, response, next) => {
 
   const newPerson = request.body
-  console.log(newPerson)
-
-  if(newPerson === undefined){
-    return response.status(400).json({ error: 'content missing' })
-  }
-
-  if(!newPerson.name){
-    return response.status(400).json({
-      error: 'name is missing'
-    })
-  }
-
-  else if(!newPerson.number){
-    return response.status(400).json({
-      error: 'number is missing'
-    })
-  }
-
-  // let person = Person.find(person => person.name === newPerson.name)
-  // console.log("99: ", person)
-  // if(person){
-  //   return response.status(400).json({
-  //     error: 'name must be unique'
-  //   })
-  // }
 
   const person = new Person({
     name: newPerson.name,
@@ -121,12 +69,10 @@ app.post('/api/persons', (request, response, next) => {
   })
 
   person.save().then(savedPerson => {
-    response.json(savedPerson)
+    response.json(savedPerson.toJSON())
   })
-  .catch(error => {next(error)})
-  
-  // persons = persons.concat(newPerson)
-  // response.json(newPerson)
+    .catch(error => {next(error)})
+
 })
 
 // UPDATE
@@ -137,7 +83,7 @@ app.put('/api/persons/:id', (request, response, next) => {
     number: updatedPersonObj.number,
   }
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+  Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
     .then(updatedPerson => {
       response.json(updatedPerson)
     })
@@ -161,7 +107,10 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  } 
+  }
+  else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  }
 
   next(error)
 }
@@ -171,5 +120,5 @@ app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on port ${PORT}`)
 })

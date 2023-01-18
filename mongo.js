@@ -16,8 +16,8 @@ else if(process.argv.length === 4){
 }
 
 const password = process.argv[2]
-let name = ""
-let number = ""
+let name
+let number
 
 const url = `mongodb+srv://zainab:${password}@cluster0.ce7cwrx.mongodb.net/phonebookApp?retryWrites=true&w=majority`
 
@@ -33,40 +33,40 @@ if(process.argv.length === 5){
   number = process.argv[4]
 
   mongoose
-  .connect(url)
-  .then((result) => {
-    console.log('connected')
+    .connect(url)
+    .then(() => {
+      console.log('connected')
 
-    const person = new Person({
-      name: name,
-      number: number,
+      const person = new Person({
+        name: name,
+        number: number,
+      })
+
+      return person.save()
     })
-
-    return person.save()
-  })
-  .then(result => {
-    console.log(`added ${result.name} number ${result.number} to phonebook`)
-     return mongoose.connection.close()
-  })
-  .catch((err) => console.log(err))
+    .then(result => {
+      console.log(`added ${result.name} number ${result.number} to phonebook`)
+      return mongoose.connection.close()
+    })
+    .catch((err) => console.log(err))
 
 }
 
 else if(process.argv.length === 3){
   mongoose
-  .connect(url)
-  .then((result) => {
-    console.log('connected')
+    .connect(url)
+    .then(() => {
+      console.log('connected')
 
-    // The parameter of the method is an object expressing search conditions. 
-    // Since the parameter is an empty object{}, we get all of the notes stored in the notes collection.
-    console.log('phonebook:')
-    Person.find({}).then(result => {
-      result.forEach(person => {
-        console.log(`${person.name} ${person.number}`)
+      // The parameter of the method is an object expressing search conditions.
+      // Since the parameter is an empty object{}, we get all of the notes stored in the notes collection.
+      console.log('phonebook:')
+      Person.find({}).then(result => {
+        result.forEach(person => {
+          console.log(`${person.name} ${person.number}`)
+        })
+        mongoose.connection.close()
       })
-      mongoose.connection.close()
     })
-  })
-  .catch((err) => console.log(err))
+    .catch((err) => console.log(err))
 }

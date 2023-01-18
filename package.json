@@ -10,7 +10,8 @@
     "build:ui": "rd /s /q build && cd ../Exercises/part2/phonebook && npm run build && copy -r build ../../../part3",
     "deploy": "flyctl deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
-    "logs:prod": "flyctl logs"
+    "logs:prod": "flyctl logs",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -26,9 +27,11 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "mongoose": "^6.8.3",
+    "mongoose-unique-validator": "^3.1.0",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "eslint": "^8.32.0",
     "nodemon": "^2.0.20"
   }
 }
